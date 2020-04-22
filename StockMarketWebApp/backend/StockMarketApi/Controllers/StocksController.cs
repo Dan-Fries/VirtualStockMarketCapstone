@@ -12,7 +12,6 @@ namespace StockMarketApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class StocksController : ControllerBase
     {
         
@@ -38,6 +37,7 @@ namespace StockMarketApi.Controllers
             this.stockAPIDao = stockAPIDao;
         }
 
+        [Authorize]
         [HttpGet("currentprices")]
         public IActionResult GetCurrentStockPrices()
         {
@@ -46,14 +46,14 @@ namespace StockMarketApi.Controllers
             return new JsonResult(currentStocks);
         }
 
-
+        [Authorize]
         [HttpGet("detail/{symbol}")]
         public IActionResult GetStockDetail(string symbol)
         {
             return new JsonResult(stockDao.GetStockBySymbol(symbol));
         }
 
-
+        [Authorize]
         [HttpPost("owned")]
         public IActionResult GetOwnedStocks([FromBody]UserAndGameAPIModel apiModel)
         {
@@ -61,6 +61,7 @@ namespace StockMarketApi.Controllers
 
             return new JsonResult(ownedStocks);
         }
+
 
         [HttpGet("research")]
         public IActionResult GetStockResearch()

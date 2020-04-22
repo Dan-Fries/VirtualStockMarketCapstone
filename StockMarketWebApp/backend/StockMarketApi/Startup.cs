@@ -156,9 +156,9 @@ namespace StockMarketApi
 
             // Setup Hangfire Dashboard
             app.UseHangfireDashboard();
-            //RecurringJob.AddOrUpdate(() => scheduledJobs.UpdateStockHistoryDataFromAPI(), "9 6,18 ? * MON,TUE,WED,THU,FRI", TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+            RecurringJob.AddOrUpdate(() => scheduledJobs.UpdateStockHistoryDataFromAPI(), "9 6,18 ? * MON,TUE,WED,THU,FRI", TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
             RecurringJob.AddOrUpdate(() => scheduledJobs.ProcessGameEnd(), "2/5 * * * *", TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
-            //RecurringJob.AddOrUpdate(() => scheduledJobs.UpdateStockDataFromAPI(), "0/15 7-18 ? * *", TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+            RecurringJob.AddOrUpdate(() => scheduledJobs.UpdateStockDataFromAPI(), "0/15 7-18 ? * *", TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
 
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 

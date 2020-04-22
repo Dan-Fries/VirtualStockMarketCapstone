@@ -58,25 +58,12 @@ export default {
   mixins: [HelperMixins],
   data() {
     return {
-      stock: Object,
-      data: Array,
-      user: Object,
-      gameId: Number,
-      token: String,
+      stock: Object,  
       symbol: String,
-      apiModel: {
-        userName: "",
-        gameId: ""
-      }
     };
   },
   created() {
     this.symbol = this.$route.params.stockSymbol;
-    this.token = this.$attrs.token;
-    this.user = this.$attrs.user;
-    this.gameId = this.$attrs.gameId;
-    this.apiModel.userName = this.user.sub;
-    this.apiModel.gameId = this.gameId;
     this.getData();
   },
   methods: {
