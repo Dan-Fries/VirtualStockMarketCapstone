@@ -72,11 +72,11 @@ export default {
         `${process.env.VUE_APP_REMOTE_API}/stocks/research/${this.symbol}`,
         {
           method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + this.token
-          }
+          // headers: {
+          //   Accept: "application/json",
+          //   "Content-Type": "application/json",
+          //   Authorization: "Bearer " + this.token
+          // }
         }
       )
         .then(response => {

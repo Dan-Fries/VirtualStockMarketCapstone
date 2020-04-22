@@ -62,7 +62,7 @@ namespace StockMarketApi.Controllers
             return new JsonResult(ownedStocks);
         }
 
-
+        [AllowAnonymous]
         [HttpGet("research")]
         public IActionResult GetStockResearch()
         {
@@ -71,6 +71,7 @@ namespace StockMarketApi.Controllers
             return new JsonResult(stocks);
         }
 
+        [AllowAnonymous]
         [HttpGet("research/{symbol}")]
         public IActionResult GetStockResearchDetail(string symbol)
         {
