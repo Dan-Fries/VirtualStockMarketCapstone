@@ -88,13 +88,23 @@
       </div>
     </div>
     <div class="card-background chart-container text-center">
-      <h1>Cash Balance</h1>
-      <line-chart-reactive
-        v-if="transactionLineLoaded"
-        :chartData="transactionLineData"
-        :options="transactionLineOptions"
-        :styles="lineChartStyles"
-      />
+      <div class="line-chart-container">
+        <h1>Cash Balance</h1>
+        <line-chart-reactive
+          v-if="transactionLineLoaded"
+          :chartData="transactionLineData"
+          :options="transactionLineOptions"
+          :styles="lineChartStyles"
+        />
+      </div>
+      <div class="pie-chart-container">
+        <h1>Portfolio Breakdown</h1>
+        <pie-chart-reactive
+          v-if="pieChartDataLoaded"
+          :chartData="pieChartData"
+          :options="pieChartOptions"
+        />
+      </div>
     </div>
 
     <owned-stocks-list v-bind:gameId="this.id" v-bind:user="this.user" v-bind:token="this.token"></owned-stocks-list>
@@ -163,14 +173,15 @@
 import HelperMixin from "@/mixins/HelperMixins.js";
 import OwnedStocksList from "@/Components/OwnedStocksList.vue";
 import LineChartReactive from "@/Components/LineChartReactive.vue";
+import PieChartReactive from "@/Components/PieChartReactive.vue";
 
 export default {
   name: "game-detail",
   mixins: [HelperMixin],
-
   components: {
     OwnedStocksList,
-    LineChartReactive
+    LineChartReactive,
+    PieChartReactive
   },
   data() {
     return {
@@ -197,17 +208,45 @@ export default {
       },
       transactionLineOptions: {
         scales: {
-          yAxes: [{
+          yAxes: [
+            {
               ticks: {
-                beginAtZero: true
-              }
-            }],
-          xAxes: [{
+                beginAtZero: true,
+                fontColor: "#EEE",
+                fontSize: 14
+              },
+            }
+          ],
+          xAxes: [
+            {
               display: false
-            }]
+            }
+          ]
+        },
+        legend: {
+          labels: {
+            fontColor: "#EEE",
+            fontSize: 16
+          }
         },
         maintainAspectRatio: false,
-        responsive: true,
+        responsive: true
+      },
+      ownedStocks: Object,
+      pieChartDataLoaded: false,
+      pieChartData: {
+        labels: [],
+        datasets: []
+      },
+      pieChartOptions: {
+        legend: {
+          labels: {
+            fontColor: "#EEE",
+            fontSize: 16
+          }
+        },
+        maintainAspectRatio: false,
+        responsive: true
       }
     };
   },
@@ -226,13 +265,68 @@ export default {
     }
     this.getGameData();
     this.getTransactionData();
-    setInterval(this.refreshData(), 3000);
+
+    // setInterval(this.refreshData(), 3000);
     // this.buildTransactionLineData();
   },
   //   }  mounted() {
 
   //   },
   methods: {
+    ownedStock() {
+      fetch(`${process.env.VUE_APP_REMOTE_API}/stocks/owned`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + this.token
+        },
+        body: JSON.stringify(this.getStocksAPIModel)
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(jsonData => {
+          this.ownedStocks = jsonData;
+          this.buildPieChartData();
+        })
+        .catch(e => {
+          console.log("Error", e);
+        });
+    },
+    buildPieChartData() {
+      this.pieChartData.labels.push("Cash");
+      let dataset = {
+        data: [],
+        backgroundColor: [],
+        borderColor: "rgba(36, 35, 26, 1)",
+      };
+
+      let balance = 0;
+      if (this.game.leaderboardData !== undefined) {
+        this.game.leaderboardData.forEach(ele => {
+          if (ele.userName === this.user.sub) {
+            balance = ele.currentBalance;
+          }
+        });
+      }
+      dataset.data.push(balance);
+      dataset.backgroundColor.push(this.getPieChartColor());
+      this.ownedStocks.forEach(stock => {
+        this.pieChartData.labels.push(stock.companyName);
+        dataset.data.push(stock.numberOfShares * stock.currentSharePrice);
+        dataset.backgroundColor.push(this.getPieChartColor());
+      });
+
+      this.pieChartData.datasets.push(dataset);
+      this.pieChartDataLoaded = true;
+    },
+    getPieChartColor() {
+        let r = Math.floor(Math.random() * 200);
+        let g = Math.floor(Math.random() * 200);
+        let b = Math.floor(Math.random() * 200);
+        return "rgba(" + r + ", " + g + ", " + b + ", 1)";
+    },
     getGameData() {
       // vue-resource example
       fetch(`${process.env.VUE_APP_REMOTE_API}/games/${this.id}`, {
@@ -248,6 +342,7 @@ export default {
         .then(jsonData => {
           this.game = jsonData;
           this.checkForGameEnd();
+          this.ownedStock();
         })
         .catch(e => {
           console.log("Error", e);
@@ -382,9 +477,9 @@ export default {
     },
     lineChartStyles() {
       return {
-        height: '800px',
-        position: 'relative',
-      }
+        height: "400px",
+        position: "relative"
+      };
     }
   }
 };
@@ -416,6 +511,18 @@ export default {
 .chart-container {
   width: 75%;
   margin-top: 5%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.line-chart-container {
+  max-width: 47%;
+  flex-grow: 1;
+}
+
+.pie-chart-container {
+  max-width: 47%;
+  flex-grow: 1;
 }
 
 .btn-primary {
